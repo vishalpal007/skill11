@@ -1,7 +1,9 @@
 const express = require('express');
-const { fetchMatches } = require('../../../controllers/admin/match/matchController');
-const router = express.Router()
+const { getLiveMatchesData } = require('../../../controllers/admin/match/matchController');
 
-router.get('/fetch', fetchMatches)
+const router = express.Router();
 
-module.exports = router
+// Route to fetch live match data
+router.get('/live', getLiveMatchesData);
+
+module.exports = router;
