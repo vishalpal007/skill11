@@ -17,7 +17,6 @@ const fetchLiveMatches = async () => {
 
         matchData = matches;
 
-        console.log("Live Matches updated:", matchData);
     } catch (error) {
         console.error('Error while fetching live matches:', error);
     }
@@ -26,9 +25,9 @@ const fetchLiveMatches = async () => {
 setInterval(fetchLiveMatches, 10000);
 
 exports.getLiveMatchesData = asyncHandler(async (req, res) => {
-    console.log("Sending response to Postman/client:", matchData);
     res.status(200).json({
         success: true,
         data: matchData,
     });
+    console.log("Sending response to Postman/client:", matchData);
 });
