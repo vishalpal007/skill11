@@ -1,37 +1,42 @@
-const express = require("express")
-const mongoose = require("mongoose")
-const cors = require("cors")
-const cookieParser = require("cookie-parser")
-require("dotenv").config("./.env")
+const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
+const cors = require('cors');
+const matchRoutes = require('./routes/admin/match/matchRoute');
+const contestRoutes = require('./routes/admin/contest/contestRoute');
 
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+    cors: {
+        origin: '*', // Allow any origin (for production use specify only the frontend domain)
+        methods: ['GET', 'POST'],
+    },
+});
 
-mongoose.connect(process.env.MONGO_URL)
-const app = express()
-
-app.use(express.json())
-app.use(cookieParser())
+// Middleware
 app.use(cors({
-    origin: "https://skill11.onrender.com",
+    origin: "*",
     credentials: true
-}))
+}));
+app.use(express.json());
 
+// Routes
+app.use('/api/v1/matches', matchRoutes);
+app.use('/api/v1/admin/contest', contestRoutes);
 
-app.use("/api/v1/auth", require("./routes/authRoute/userRoute"))
-app.use("/api/v1/admin/matches", require("./routes/admin/match/matchRoute"))
-app.use("/api/v1/admin/contest", require("./routes/admin/contest/contestRoute"))
+// Socket.IO connection
+io.on('connection', (socket) => {
+    console.log('Client connected to live match updates');
 
-app.use("*", (req, res) => {
-    res.status(404).json({ message: "No Resource Found" })
-})
+    // Handle disconnect
+    socket.on('disconnect', () => {
+        console.log('Client disconnected');
+    });
+});
 
+server.listen(5000, () => {
+    console.log('Server is running on port 5000');
+});
 
-app.use((err, req, res, next) => {
-    console.log(err);
-    return res.status(500).json({ message: err.message || "Something went wrong" })
-})
-
-
-mongoose.connection.once("open", () => {
-    console.log("Mongoose connected")
-    app.listen(process.env.PORT, console.log(`Server running ${process.env.PORT}`))
-})
+module.exports = { io };
