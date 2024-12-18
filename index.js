@@ -16,7 +16,7 @@ const io = socketIo(server, {
 
 // Middleware
 app.use(cors({
-    origin: "*",
+    origin: "https://skill11.onrender.com",
     credentials: true
 }));
 app.use(express.json());
