@@ -1,33 +1,18 @@
-const axios = require('axios');
 const asyncHandler = require('express-async-handler');
-require('dotenv').config();
-
-let matchData = [];
-
-const UPCOMING_MATCHES_URL = process.env.UPCOMING_MATCHES
-
-const fetchLiveMatches = async () => {
-    try {
-        if (!UPCOMING_MATCHES_URL) {
-            throw new Error("UPCOMING_MATCHES_URL is not defined. Check your environment variables.");
-        }
-        const response = await axios.get(UPCOMING_MATCHES_URL);
-
-        const matches = response?.data?.response?.items || [];
-
-        matchData = matches;
-
-    } catch (error) {
-        console.error('Error while fetching live matches:', error);
-    }
-};
-
-setInterval(fetchLiveMatches, 10000);
+const { getMatchData } = require('../../../services/MatchDetails');
 
 exports.getLiveMatchesData = asyncHandler(async (req, res) => {
-    res.status(200).json({
-        success: true,
-        data: matchData,
-    });
-    console.log("Sending response to Postman/client:", matchData);
+    try {
+        const liveMatches = getMatchData(); // Fetch cached live matches
+        res.status(200).json({
+            success: true,
+            data: liveMatches,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch live match data.",
+            error: error.message,
+        });
+    }
 });
